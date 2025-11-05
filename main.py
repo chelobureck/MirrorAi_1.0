@@ -4,6 +4,9 @@ from fastapi_limiter import FastAPILimiter
 import redis.asyncio as redis
 from config.settings import get_settings
 from models.database import Base, engine, init_db
+from routers import (
+    auth
+)
 
 import os
 
@@ -21,6 +24,8 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
+
+app.include_router(auth.router, prefix=settings.API_V1_STR, tags=["auth"])
 """
 тут надо прописать роутеры, в остальном баги исправлены, сервер запускается
 """

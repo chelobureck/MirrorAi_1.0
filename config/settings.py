@@ -32,6 +32,12 @@ class Settings(BaseSettings):
     GMAIL_USER: str = "your-gmail-user"
     GMAIL_APP_PASSWORD: str = "your-gmail-app-password"
 
+    # Google OAuth
+    GOOGLE_CLIENT_ID: str = "your-google-client-id"
+    GOOGLE_CLIENT_SECRET: str = "your-google-client-secret"
+    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/auth/callback"
+
+
     # Окружение
     ENVIRONMENT: str = "development"
 
