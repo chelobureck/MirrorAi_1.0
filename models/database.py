@@ -108,7 +108,7 @@ else:
         pool_size=20,
         max_overflow=30,
         pool_recycle=3600,
-        connect_args=connect_args
+        connect_args=connect_args 
     )
 
 

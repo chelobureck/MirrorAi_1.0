@@ -4,7 +4,9 @@ from fastapi_limiter import FastAPILimiter
 import redis.asyncio as redis
 from config.settings import get_settings
 from models.database import Base, engine, init_db
+
 import os
+
 
 settings = get_settings()
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION)
@@ -18,6 +20,18 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"],
 )
+
+"""
+тут надо прописать роутеры, в остальном баги исправлены, сервер запускается
+"""
+
+@app.get("/")
+async def root():
+    return {"message": "Welcome to SayDeck API"}
+
+@app.get("/health")
+async def health():
+    return {"status": "healthy"}
 
 @app.on_event("startup")
 async def startup_event():
