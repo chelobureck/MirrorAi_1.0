@@ -28,6 +28,8 @@ async def register(
     user_data: UserCreate,
     session: AsyncSession = Depends(get_session)
 ):
+    # Создаем переменную с паролем
+    user_password = user_data.password.strip()
     # Проверяем, существует ли пользователь
     result = await session.execute(
         select(User).where((User.email == user_data.email) | (User.username == user_data.username))
@@ -41,7 +43,7 @@ async def register(
     # Мок-подтверждение email (реально email не отправляем)
     is_email_verified = True
     # Создаем нового пользователя
-    hashed_password = get_password_hash(user_data.password)
+    hashed_password = get_password_hash(user_password)
     new_user = User(
         email=user_data.email,
         username=user_data.username,
