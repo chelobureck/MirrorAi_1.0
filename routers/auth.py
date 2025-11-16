@@ -124,6 +124,12 @@ async def google_callback(code: str, session: AsyncSession = Depends(get_session
             },
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
+        if token_resp.status_code != 200:
+            print(f"Error from Google Token API: {token_resp.text}")
+            raise HTTPException(
+                status_code=400, 
+                detail="Ошибка обмена кода авторизации. Код: " + token_resp.json().get('error', 'Неизвестно')
+            )
         token_data = token_resp.json()
         id_token = token_data.get("id_token")
         access_token = token_data.get("access_token")
@@ -135,6 +141,13 @@ async def google_callback(code: str, session: AsyncSession = Depends(get_session
         )
         userinfo = userinfo_resp.json()
     email = userinfo.get("email")
+    if not email:
+        # Если email отсутствует, это серьезная ошибка,
+        # так как мы не сможем идентифицировать пользователя.
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Не удалось получить адрес электронной почты от Google. Проверьте запрошенные scope."
+        )
     username = userinfo.get("name") or email.split("@")[0]
     # Проверяем, есть ли пользователь
     result = await session.execute(
