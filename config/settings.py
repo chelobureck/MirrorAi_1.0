@@ -36,7 +36,11 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str = "your-google-client-id"
     GOOGLE_CLIENT_SECRET: str = "your-google-client-secret"
     GOOGLE_REDIRECT_URI: str = "http://localhost:8000/auth/callback"
+    GOOGLE_REFRESH_TOKEN: str = "refresh-token"
 
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: str = "587"
+    SMTP_USER: str = "smtp-user"
 
     # Окружение
     ENVIRONMENT: str = "development"
