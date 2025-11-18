@@ -56,32 +56,51 @@ async def register(
     await session.refresh(new_user)
     return new_user
 
+
 @router.post("/login", response_model=Token)
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     session: AsyncSession = Depends(get_session)
 ):
-    # Проверяем существование пользователя
+    # 1. Проверяем существование пользователя
     result = await session.execute(
         select(User).where(User.email == form_data.username)
     )
     user = result.scalars().first()
-    if not user or not verify_password(form_data.password, str(user.hashed_password)):
+    
+    is_authenticated = False
+    
+    if user:
+        db_password = str(user.hashed_password)
+        
+        #Проверка: Если это Google-аккаунт
+        if db_password == settings.GOOGLE_OAUTH_MARKER:
+            # Пользователь найден, но вход через форму логина/пароля запрещен.
+            # Считаем аутентификацию недействительной.
+            is_authenticated = False
+            
+        #Проверка: Если это обычный аккаунт (хеш распознается)
+        else:
+            is_authenticated = verify_password(form_data.password, db_password)
+
+    #Если аутентификация не удалась (пользователь не найден, неверный пароль или Google-аккаунт)
+    if not is_authenticated:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+        
+    #Генерация токенов (выполняется, только если is_authenticated == True)
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.email, "role": user.role, "credits": user.credits}, expires_delta=access_token_expires
+        data={"sub": user.email, "role": user.role, "credits": user.credits}, expires_delta=access_token_expires #type: ignore
     )
-    # Генерация refresh токена (на 7 дней)
     refresh_token_expires = timedelta(days=7)
     refresh_token = create_access_token(
-        data={"sub": user.email, "type": "refresh"}, expires_delta=refresh_token_expires
+        data={"sub": user.email, "type": "refresh"}, expires_delta=refresh_token_expires #type: ignore
     )
-    # refresh_token можно возвращать в httpOnly cookie (реализовать на фронте)
+    
     return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
 @router.post("/refresh", response_model=Token)

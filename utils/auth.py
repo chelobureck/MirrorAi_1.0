@@ -12,7 +12,7 @@ from config.settings import get_settings
 from sqlalchemy import select
 
 settings = get_settings()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["argon2", "bcrypt"], default="argon2", deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 oauth2_scheme_optional = HTTPBearer(auto_error=False)
 

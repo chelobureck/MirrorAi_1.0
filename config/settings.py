@@ -38,6 +38,8 @@ class Settings(BaseSettings):
     GOOGLE_REDIRECT_URI: str = "http://localhost:8000/auth/callback"
     GOOGLE_REFRESH_TOKEN: str = "refresh-token"
 
+    GOOGLE_OAUTH_MARKER:str = "google_oauth"
+
     SMTP_HOST: str = "smtp.gmail.com"
     SMTP_PORT: str = "587"
     SMTP_USER: str = "smtp-user"

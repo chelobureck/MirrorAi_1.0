@@ -5,7 +5,8 @@ asyncpg
 aiosqlite
 alembic
 python-jose[cryptography]
-passlib[bcrypt]
+passlib
+argon2-cffi
 python-multipart
 httpx
 aiohttp

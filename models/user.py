@@ -1,7 +1,14 @@
 from __future__ import annotations
 from typing import Optional
 from datetime import datetime
-import bcrypt
+from typing import Optional
+from datetime import datetime, timedelta
+from jose import jwt, JWTError
+from passlib.context import CryptContext
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, HTTPBearer
+
+
 
 from sqlalchemy import String, Integer, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -9,6 +16,9 @@ from sqlalchemy.sql import func
 
 from models.database import Base
 
+pwd_context = CryptContext(schemes=["argon2", "bcrypt"], default="argon2", deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+oauth2_scheme_optional = HTTPBearer(auto_error=False)
 
 class User(Base):
     __tablename__ = "users"
@@ -32,9 +42,11 @@ class User(Base):
     preferences = relationship("UserPreferences", back_populates="user", uselist=False)
 
     # Методы для работы с паролем
-    def verify_password(self, password: str) -> bool:
-        return bcrypt.checkpw(password.encode("utf-8"), self.hashed_password.encode("utf-8"))
+    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
+        """Проверяет пароль, используя CryptContext (теперь Argon2)."""
+        return pwd_context.verify(plain_password, hashed_password)
 
     @staticmethod
-    def hash_password(password: str) -> str:
-        return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    def get_password_hash(password: str) -> str:
+        """Создает хеш пароля, используя CryptContext (теперь Argon2)."""
+        return pwd_context.hash(password)
