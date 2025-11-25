@@ -5,7 +5,7 @@ from sqlalchemy import select
 from datetime import timedelta
 from models.database import get_session
 from models.user import User
-from shemas.user import UserCreate, UserResponse, Token, EmailVerificationRequest, EmailVerificationResponse
+from shemas.user import UserCreate, UserResponse, Token, EmailVerificationRequest, EmailVerificationResponse, RefreshTokenRequest
 from utils.auth import (
     verify_password,
     get_password_hash,
@@ -105,9 +105,17 @@ async def login(
 
 @router.post("/refresh", response_model=Token)
 async def refresh_token(
-    refresh_token: str = Cookie(None),
+    request_body: RefreshTokenRequest,
+    refresh_token_cookie: str = Cookie(None, alias="refresh_token"),
     session: AsyncSession = Depends(get_session)
 ):
+    # Приоритет: сначала тело запроса, затем cookie
+    refresh_token = None
+    if request_body and request_body.refresh_token:
+        refresh_token = request_body.refresh_token
+    elif refresh_token_cookie:
+        refresh_token = refresh_token_cookie
+    
     user = await get_current_user_by_refresh_token(refresh_token, session)
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(

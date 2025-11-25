@@ -34,3 +34,6 @@ class EmailVerificationRequest(BaseModel):
 
 class EmailVerificationResponse(BaseModel):
     message: str
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str

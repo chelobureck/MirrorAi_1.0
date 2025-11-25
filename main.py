@@ -5,7 +5,8 @@ import redis.asyncio as redis
 from config.settings import get_settings
 from models.database import Base, engine, init_db
 from routers import (
-    auth
+    auth,
+    boards
 )
 
 import os
@@ -26,6 +27,7 @@ app.add_middleware(
 
 
 app.include_router(auth.router, prefix=settings.API_V1_STR, tags=["auth"])
+app.include_router(boards.router, prefix=settings.API_V1_STR, tags=["boards"])
 """
 тут надо прописать роутеры, в остальном баги исправлены, сервер запускается
 """

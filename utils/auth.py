@@ -69,7 +69,7 @@ async def get_current_user(
 
 # Функция для валидации refresh токена
 async def get_current_user_by_refresh_token(
-    refresh_token: str,
+    refresh_token: str | None,
     session: AsyncSession = Depends(get_session)) -> User:
 
     credentials_exception = HTTPException(
@@ -77,6 +77,10 @@ async def get_current_user_by_refresh_token(
         detail="Could not validate refresh token",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
+    # Проверяем, что refresh_token не None
+    if refresh_token is None:
+        raise credentials_exception
 
     try:
         payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
