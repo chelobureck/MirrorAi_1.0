@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_limiter import FastAPILimiter
+from fastapi.security import OAuth2PasswordBearer
 import redis.asyncio as redis
 from config.settings import get_settings
 from models.database import Base, engine, init_db
@@ -10,6 +11,8 @@ from routers import (
 )
 
 import os
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
 
 
 settings = get_settings()
@@ -39,6 +42,10 @@ async def root():
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
+
+@app.get("/users/me")
+async def read_users_me(token: str = Depends(oauth2_scheme)):
+    return {"token": token}
 
 @app.on_event("startup")
 async def startup_event():
